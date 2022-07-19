@@ -26,7 +26,7 @@ public class MemberServiceImpl implements MemberService {
 			logger.info(result.get(i).getUsername());
 		}
 		
-		return result;
+		return null;
 	}
 
 	
