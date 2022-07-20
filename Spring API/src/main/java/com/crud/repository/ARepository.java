@@ -12,7 +12,7 @@ import com.crud.model.Member;
 @Repository
 public interface ARepository extends JpaRepository<Member, Long> {
 
-	@Query(value="SELECT * from ds_meta_basic",nativeQuery=true)
+	@Query(value="SELECT * from cake",nativeQuery=true)
 	List<Member> findbyDepartmentALL(String department);
 	
 }

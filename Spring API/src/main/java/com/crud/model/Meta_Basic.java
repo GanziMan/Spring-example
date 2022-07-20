@@ -47,6 +47,31 @@ public class Meta_Basic {
 	private String description;
 	private String title;
 	private String issued;
+	private String modifed;
+	private String language;
+	private String publisher_name;
+	private String publisher_mail;
+	private String publisher_phone;
+	private String publisher_homepage;
+	private String identifier;
+	private String theme;
+	private String type;
+	private String keyword;
+	private String landingPage;
+	private String license;
+	private String rights;
+	private String distribution;
+	private String spatialResolutionInMeters;
+	private String temporalResolution;
+	private String accrualPeriodicity;
+	private String spatial;
+	private String temporal;
+	private String metadata_type;
+	private String endpointURL;
+	private String previewURL;
+
+	
+	
 	
 	public String getContactPoint_name() {
 		return contactPoint_name;
@@ -58,6 +83,7 @@ public class Meta_Basic {
 
 	public String getContactPoint_mail() {
 		return contactPoint_mail;
+		
 	}
 
 	public void setContactPoint_mail(String contactPoint_mail) {
