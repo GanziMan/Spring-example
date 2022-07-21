@@ -12,12 +12,14 @@ import com.crud.model.TestVo;
 @Repository
 public interface TestMemberRepository extends JpaRepository<TestVo, Long> {
 
-	public List<TestVo> findById(String id);
+	public List<TestVo> findById(String goods);
 
 	public List<TestVo> findByName(String name);
 
 	// like검색도 가능
 	public List<TestVo> findByNameLike(String keyword);
+	
+	
 	
 }
 

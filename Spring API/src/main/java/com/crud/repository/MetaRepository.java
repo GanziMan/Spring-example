@@ -14,12 +14,10 @@ import com.crud.model.TestVo;
 @Repository
 public interface MetaRepository extends JpaRepository<Meta_Basic, String> {
 
-	Optional<Meta_Basic> findById(String identifier);
-
-
-
-	
-
-	
+	public Optional<Meta_Basic> findById(String identifier); 
+//	public List<Meta_Basic> findByName(String name);
+//
+//	// like검색도 가능
+//	public List<Meta_Basic> findByNameLike(String keyword);
 }
- 
+   	

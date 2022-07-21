@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,13 +21,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crud.model.Car;
 import com.crud.model.Member;
 import com.crud.model.Meta_Basic;
 import com.crud.model.TestVo;
-
 import com.crud.service.MemberService;
 import com.crud.service.Meta_Service;
 import com.crud.service.TestMemberService;
@@ -45,7 +47,8 @@ public class APIcontroller {
 	private TestMemberService testMemberService;
 	@Autowired
 	private Meta_Service meta_Service;
-
+	
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 //	 @RequestMapping(method = RequestMethod.POST, path = "/pos2") //post api
 //	    public PostRequestDTO postRequestAnotherApi(@RequestBody PostRequestDTO infoVO){ // ReqyestBody 어노테이션을 붙여주지 않으니까 body에 넣어준 데이터가 null로 온다.
@@ -78,24 +81,52 @@ public class APIcontroller {
 	}
 	
 	@GetMapping("/basic-meta/metadata-list")
-	public List<Car> list(){
-		List<Car> returnList = new ArrayList<>();
+	public ResponseEntity<String> list(){
+		List<Object> returnList = new ArrayList<>();
+		
 		List<Meta_Basic> meta_basic = meta_Service.getmeta_basicList();
 		HashMap<String, Object> status_result= new LinkedHashMap<String, Object>();
-
-		status_result.put("status",200);
-		status_result.put("message", "전체 사용자조회 성공");
-		status_result.put("data","조회");
-		Car car = new Car.Builder()    // 필수값 입력
-				.resultCode("0000")
-				.status(status_result)
-				.list(new ArrayList<>(meta_basic))
-				.resultMsg("Everything is working")
-			    .build();
+		returnList.add(meta_basic);
+		status_result.put("DatasetBasicInfos", meta_basic);
+		                                                    
+//		Car car = new Car.Builder()    // 필수값 입력
+//				.list(new ArrayList<>(meta_basic))
+//			    .build();
+//		returnList.add(car);
 		
-		returnList.add(car);
-		return returnList;
+	
+		HashMap<String, Object> layout = new LinkedHashMap<String,Object>();
+		layout.put("resultCode", "0000");
+		layout.put("resultData",status_result);
+		layout.put("resultMsg","Eyerything is working");
+	
+		return new ResponseEntity(layout,HttpStatus.OK);
 	}
+ 
+	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE }, value="basic-meta/metadata-list/param")
+	public ResponseEntity<Meta_Basic> list_identifier(@RequestParam("identifier") String identifier){
+		
+		
+		List<Object> resultList=new ArrayList<>();
+		
+		Optional<Meta_Basic> meta_Basic = meta_Service.findById(identifier);
+		resultList.add(meta_Basic.get());
+		HashMap<String, Object> layout = new LinkedHashMap<String,Object>();
+		layout.put("DatasetBasicInfos", resultList);
+		
+	
+		
+		HashMap<String,Object> layout2= new LinkedHashMap<String,Object>();
+		layout2.put("resultCode", "0000");
+		layout2.put("resultData", layout);
+		layout2.put("resultMsg","Eyerything is working");
+		
+
+		return new ResponseEntity(layout2,HttpStatus.OK);
+	}
+
+
+	
 	
 //	@GetMapping("/basic-meta/metadata-list/{identifier}")
 //	@ResponseBody
@@ -119,41 +150,49 @@ public class APIcontroller {
 	
 
 	//CRUD
-	//전체조회
-	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE },value="/lookup")
-	public ResponseEntity<List<TestVo>> getAllmembers(){
-		List<TestVo> member = testMemberService.findAll();
-		return new ResponseEntity<List<TestVo>>(member,HttpStatus.OK);
+	//ds_meta_basic/select_all
+	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE },value="/ds_meta_basic/select_all")
+	public ResponseEntity<List<Meta_Basic>> getAllmembers(){
+		List<Meta_Basic> metadata = meta_Service.getmeta_basicList();
+		HashMap<String,Object> layout = new LinkedHashMap<String,Object>();
+		layout.put("status","200");
+		layout.put("result", metadata);
+		layout.put("message", "정상 호출");
+		
+		return new ResponseEntity(layout,HttpStatus.OK);
 	}
-	// 회원번호 한명의 회원 조회
-	@GetMapping(produces= {MediaType.APPLICATION_JSON_VALUE} ,value= "/lookup/{mbrNo}")
-	public ResponseEntity<TestVo> getMember(@PathVariable("mbrNo") Long mbrNo)
+	//ds_meta_basic/select_identifier
+	@GetMapping(produces= {MediaType.APPLICATION_JSON_VALUE} ,value= "/ds_meta_basic/select_identifier")
+	public ResponseEntity<Meta_Basic> getMember(@RequestParam("identifier") String identifier)
 	{
-		Optional<TestVo> member =testMemberService.findById(mbrNo);
-		return new ResponseEntity<TestVo>(member.get(),HttpStatus.OK);
+		Optional<Meta_Basic> metadata =meta_Service.findById(identifier);
+		return new ResponseEntity<Meta_Basic>(metadata.get(),HttpStatus.OK);
 	}
 	
 	
 	
-	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE }, value="basic-meta/{identifier}")
-	public ResponseEntity<Meta_Basic> list_identifier(@PathVariable("identifier") String identifier){
-		
-		Optional<Meta_Basic> meta_Basic = meta_Service.findById(identifier);
-		
-		
-		return new ResponseEntity<Meta_Basic>(meta_Basic.get(),HttpStatus.OK);
-	}
+	//ds_meta_basic/delete_schema
+			@DeleteMapping(value = "/ds_meta_basic/delete_schema", produces = { MediaType.APPLICATION_JSON_VALUE })
+			    public ResponseEntity<Meta_Basic> deleteMember(@RequestParam("identifier") String identifier) {
+			        meta_Service.deleteById(identifier);
+			        HashMap<String,Object> layout =new LinkedHashMap<String, Object>();
+			        layout.put("status", "200");
+			        layout.put("result","DATASET_DOUZONE_4 삭제완료");
+			        layout.put("message", "삭제 완료");
+			   
+			        return new ResponseEntity(layout,HttpStatus.OK);
+			    }
 	
 	
 	
+//	// 회원번호로 회원삭제
+//	@DeleteMapping(value = "/{mbrNo}", produces = { MediaType.APPLICATION_JSON_VALUE })
+//	    public ResponseEntity<Void> deleteMember(@PathVariable("mbrNo") Long mbrNo) {
+//	        testMemberService.deleteById(mbrNo);
+//	        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+//	    }
 	
 	
-	// 회원번호로 회원삭제
-	@DeleteMapping(value = "/{mbrNo}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	    public ResponseEntity<Void> deleteMember(@PathVariable("mbrNo") Long mbrNo) {
-	        testMemberService.deleteById(mbrNo);
-	        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	    }
 	
 	//회원번호로 수	
 	@PutMapping(value="/{mbrNo}", produces = {MediaType.APPLICATION_JSON_VALUE})

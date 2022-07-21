@@ -30,8 +30,8 @@ public class Meta_Service {
 		return result;
 	}
 	public Optional<Meta_Basic> findById(String identifier){
-		Optional<Meta_Basic> member = metaRepository.findById(identifier);
-		return member;
+		Optional<Meta_Basic> result = metaRepository.findById(identifier);
+		return result;
 	}
 //	public Optional<Meta_Basic> findById(String identifier) {
 //		Optional<Meta_Basic> meta_basic = metaRepository.deleteAllById(identifier);
@@ -42,5 +42,11 @@ public class Meta_Service {
 //		Optional<TestVo> member = testMemberRepository.findById(mbrNo);
 //		return member;
 //	}
+	
+	public void deleteById(String identifier) {
+		metaRepository.deleteById(identifier);
+	}
+	
+
 }
  

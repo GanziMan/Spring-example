@@ -20,6 +20,8 @@ public class TestVo {
 		@Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long mbrNo;
+		
+		private Long num;
 
 	    private String id;
 
