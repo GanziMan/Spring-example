@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.crud.model.Meta_Basic;
-
+import com.crud.model.TestVo;
 import com.crud.repository.MetaRepository;
 
 @Service
@@ -43,8 +43,26 @@ public class Meta_Service {
 //		return member;
 //	}
 	
+	public void updateById(String identifier, Meta_Basic member) {
+		Optional<Meta_Basic> e=  metaRepository.findById(identifier);
+		
+		if(e.isPresent()) {
+			e.get().setIdentifier(member.getIdentifier());
+			e.get().setIdentifier(member.getSpatial());
+			metaRepository.save(member);
+		
+		}
+	}
+	
 	public void deleteById(String identifier) {
 		metaRepository.deleteById(identifier);
+	}
+	
+	public Meta_Basic save(Meta_Basic data) {
+		System.out.println(data.toString());
+		logger.info(data.getIdentifier());
+		metaRepository.save(data);
+		return data;
 	}
 	
 

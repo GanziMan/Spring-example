@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crud.model.Car;
 import com.crud.model.Member;
 import com.crud.model.Meta_Basic;
 import com.crud.model.TestVo;
@@ -58,12 +58,9 @@ public class APIcontroller {
 	@GetMapping("/alivecheck") 
 	public ResponseEntity<String> alivecheck() {
 		HashMap<String, Object> result = new LinkedHashMap<String, Object>();
+		result.put("message", "alive");
 
-		result.put("status", 400);
-		result.put("message", "parameter null");
-		result.put("data", "실패");
-
-		return new ResponseEntity(result, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity(result, HttpStatus.OK);
 	}
 
 	@GetMapping("/select")
@@ -183,30 +180,45 @@ public class APIcontroller {
 			        return new ResponseEntity(layout,HttpStatus.OK);
 			    }
 	
-	
-	
-//	// 회원번호로 회원삭제
+//	
+//	
+////	 회원번호로 회원삭제
 //	@DeleteMapping(value = "/{mbrNo}", produces = { MediaType.APPLICATION_JSON_VALUE })
 //	    public ResponseEntity<Void> deleteMember(@PathVariable("mbrNo") Long mbrNo) {
-//	        testMemberService.deleteById(mbrNo);
-//	        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+//        testMemberService.deleteById(mbrNo);
+//        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 //	    }
-	
+//	
 	
 	
 	//회원번호로 수	
-	@PutMapping(value="/{mbrNo}", produces = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<TestVo> updateMember(@PathVariable("mbrNo") Long mbrNo, TestVo member){
-		
-		testMemberService.updateById(mbrNo, member);
-		return new ResponseEntity<TestVo>(member, HttpStatus.OK);
-		
+//	@PutMapping(value="/{mbrNo}", produces = {MediaType.APPLICATION_JSON_VALUE})
+//	public ResponseEntity<TestVo> updateMember(@PathVariable("mbrNo") Long mbrNo, TestVo member){
+//		testMemberService.updateById(mbrNo, member);
+//		return new ResponseEntity<TestVo>(member, HttpStatus.OK);
+//	}
+	
+	@PutMapping(value="ds_meta_basic/update_schema", produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<Meta_Basic> updateMember(@RequestParam("identifier") String identifier, @RequestBody Meta_Basic member){
+		meta_Service.updateById(identifier, member);
+			
+		return new ResponseEntity<Meta_Basic>(member, HttpStatus.OK);
 	}
 	// 회원 입력
-    @PostMapping
-    public ResponseEntity<TestVo> save(TestVo member) {
-        return new ResponseEntity<TestVo>(testMemberService.save(member), HttpStatus.OK);
-    }
+//    @PostMapping                                                                                                                                         
+//    public ResponseEntity<TestVo> save(TestVo member) {
+//        return new ResponseEntity<TestVo>(testMemberService.save(member), HttpStatus.OK);
+//    }  
+    @PostMapping(value="ds_meta_basic/insert_schema")
+    public ResponseEntity<Meta_Basic> save(@RequestBody Meta_Basic data) {
+    	logger.info(data.toString());
+    	meta_Service.save(data);
+    	HashMap<String,Object> layout = new LinkedHashMap<String,Object>();
+    	layout.put("status", "200");
+    	layout.put("result","DATASET 추가");
+    	layout.put("message", "추가 완료");
+        return new ResponseEntity(layout,HttpStatus.OK);
+    }  
 
     // 회원 입력
     @RequestMapping(value="/saveMember", method = RequestMethod.GET)
