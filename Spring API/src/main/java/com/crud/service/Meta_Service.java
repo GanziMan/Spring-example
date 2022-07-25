@@ -2,15 +2,11 @@ package com.crud.service;
 
 import java.util.List; 
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
-
 import com.crud.model.Meta_Basic;
-import com.crud.model.TestVo;
 import com.crud.repository.MetaRepository;
 
 @Service
@@ -47,8 +43,7 @@ public class Meta_Service {
 		Optional<Meta_Basic> e=  metaRepository.findById(identifier);
 		
 		if(e.isPresent()) {
-			e.get().setIdentifier(member.getIdentifier());
-			e.get().setIdentifier(member.getSpatial());
+			e.get().setIdentifier(member.getIdentifier()); 
 			metaRepository.save(member);
 		
 		}

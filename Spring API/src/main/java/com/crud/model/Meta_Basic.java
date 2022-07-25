@@ -22,7 +22,7 @@ import lombok.Setter;
 public class Meta_Basic {
 
 	@Id
-	@Column(name = "identifier",unique=true)
+	@Column(name = "identifier")
 //	@GeneratedValue(strategy = GenerationType.IDENTITY) // 
 	private String identifier;
 	private String accessRights;
@@ -50,6 +50,7 @@ public class Meta_Basic {
 	private String spatialResolutionInMeters;
 	private String temporalResolution;
 	private String accrualPeriodicity;
+	@Column(name="spatial")
 	private String spatial;
 	private String temporal;
 	private String metadata_type;
