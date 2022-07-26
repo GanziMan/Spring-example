@@ -6,8 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,10 +23,11 @@ import com.crud.model.Member;
 import com.crud.model.Meta_Basic;
 import com.crud.model.Meta_Distribution;
 import com.crud.model.Schema_Info;
+import com.crud.repository.MetaMapper;
 import com.crud.service.Distribution_Service;
 import com.crud.service.MemberService;
 import com.crud.service.Meta_Service;
-import com.crud.service.TestMemberService;
+import com.crud.service.SchemaInfo_Service;
 
 @RestController
 @RequestMapping("/mms")
@@ -41,13 +40,14 @@ public class APIcontroller {
 
 	@Autowired
 	private MemberService memberService;
-	@Autowired
-	private TestMemberService testMemberService;
+//	@Autowired
+//	private TestMemberService testMemberService;
 	@Autowired
 	private Meta_Service meta_Service;
 	@Autowired
 	private Distribution_Service distribution_Service;
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	@Autowired
+	private SchemaInfo_Service schemainfo_Service;
 
 //	 @RequestMapping(method = RequestMethod.POST, path = "/pos2") //post api
 //	    public PostRequestDTO postRequestAnotherApi(@RequestBody PostRequestDTO infoVO){ // ReqyestBody 어노테이션을 붙여주지 않으니까 body에 넣어준 데이터가 null로 온다.
@@ -78,18 +78,17 @@ public class APIcontroller {
 
 	@GetMapping("/basic-meta/metadata-list")
 	public ResponseEntity<String> list() {
-		List<Object> returnList = new ArrayList<>();
+
 
 		List<Meta_Basic> meta_basic = meta_Service.getmeta_basicList();
 		HashMap<String, Object> status_result = new LinkedHashMap<String, Object>();
-		returnList.add(meta_basic);
 		status_result.put("DatasetBasicInfos", meta_basic);
 
 //		Car car = new Car.Builder()    // 필수값 입력
 //				.list(new ArrayList<>(meta_basic))
 //			    .build();
 //		returnList.add(car);
-
+		
 		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
 		layout.put("resultCode", "0000");
 		layout.put("resultData", status_result);
@@ -115,6 +114,18 @@ public class APIcontroller {
 
 		return new ResponseEntity(layout2, HttpStatus.OK);
 	}
+	
+	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE }, value = "basic-meta/filter-list")
+	public ResponseEntity<Meta_Basic> basic_filterlist(@RequestParam("identifier") String identifier){
+		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
+		List<Meta_Basic> name = meta_Service.filterlist_name();
+		List<Meta_Basic> type = meta_Service.filterlist_type();
+		List<Meta_Basic> theme = meta_Service.filterlist_theme();
+		layout.put("DataType", type);
+		layout.put("Creator",  name);
+		layout.put("Theme", theme);
+		return new ResponseEntity(layout,HttpStatus.OK);
+	}
 
 //	@GetMapping("/basic-meta/metadata-list/{identifier}")
 //	@ResponseBody
@@ -136,8 +147,6 @@ public class APIcontroller {
 //		return returnList;
 //	}
 
-	
-	
 	// CRUD
 	// ds_meta_basic/select_all
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE }, value = "/ds_meta_basic/select_all")
@@ -170,7 +179,6 @@ public class APIcontroller {
 		layout.put("status", "200");
 		layout.put("result", "DATASET_DOUZONE_4 삭제완료");
 		layout.put("message", "삭제 완료");
-
 		return new ResponseEntity(layout, HttpStatus.OK);
 	}
 
@@ -192,9 +200,8 @@ public class APIcontroller {
 //	}
 
 	@PutMapping(value = "ds_meta_basic/update_schema", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Meta_Basic> updateMember(@RequestParam("identifier") String identifier,
-			@RequestBody Meta_Basic member) {
-		meta_Service.updateById(identifier, member);
+	public ResponseEntity<Meta_Basic> updateMember(@RequestBody Meta_Basic member) {
+		meta_Service.updateById(member);
 		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
 		layout.put("status", "200");
 		layout.put("result", "DATASET 업데이트 완료");
@@ -210,7 +217,6 @@ public class APIcontroller {
 //    }  
 	@PostMapping(value = "ds_meta_basic/insert_schema")
 	public ResponseEntity<Meta_Basic> save(@RequestBody Meta_Basic data) {
-		logger.info(data.toString());
 		meta_Service.save(data);
 		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
 		layout.put("status", "200");
@@ -225,8 +231,8 @@ public class APIcontroller {
 //		return new ResponseEntity<TestVo>(testMemberService.save(member), HttpStatus.OK);
 //	}
 
-	//ds_distribution/select_all
-	@GetMapping(value="ds_distribution/select_all",produces = { MediaType.APPLICATION_JSON_VALUE })
+	// ds_distribution/select_all
+	@GetMapping(value = "ds_distribution/select_all", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<Meta_Distribution>> getAlldistribution() {
 		List<Meta_Distribution> metadata = distribution_Service.getmeta_distributionList();
 		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
@@ -236,10 +242,9 @@ public class APIcontroller {
 
 		return new ResponseEntity(layout, HttpStatus.OK);
 	}
-	
-	
-	//ds_distribution/select_identifier
-	@GetMapping( value = "ds_distribution/select_identifier", produces = { MediaType.APPLICATION_JSON_VALUE })
+
+	// ds_distribution/select_identifier
+	@GetMapping(value = "ds_distribution/select_identifier", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Meta_Distribution> getdistribution(@RequestParam("identifier") String identifier) {
 		Optional<Meta_Distribution> metadata = distribution_Service.findById(identifier);
 		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
@@ -248,9 +253,8 @@ public class APIcontroller {
 		layout.put("message", "정상 호출");
 		return new ResponseEntity(layout, HttpStatus.OK);
 	}
-	
-	
-	//ds_distribution/delete_schema
+
+	// ds_distribution/delete_schema
 	@DeleteMapping(value = "/ds_distribution/delete_schema", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Meta_Distribution> deletedistribution(@RequestParam("identifier") String identifier) {
 		distribution_Service.deleteById(identifier);
@@ -260,23 +264,21 @@ public class APIcontroller {
 		layout.put("message", "삭제 완료");
 		return new ResponseEntity(layout, HttpStatus.OK);
 	}
-	
-	
-	//ds_distribution/update_schema
+
+	// ds_distribution/update_schema
 	@PutMapping(value = "ds_distribution/update_schema", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Meta_Basic> updatedistribution(@RequestParam("identifier") String identifier,
-			@RequestBody Meta_Distribution member) {
-		distribution_Service.updateById(identifier, member);
+	public ResponseEntity<Meta_Basic> updatedistribution(@RequestBody Meta_Distribution member) {
+		distribution_Service.updateById(member);
 		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
 		layout.put("status", "200");
 		layout.put("result", "DATASET 업데이트 완료");
 		layout.put("message", "업데이트 완료");
 		return new ResponseEntity(layout, HttpStatus.OK);
 	}
-	//ds_distribution/insert_schema
+
+	// ds_distribution/insert_schema
 	@PostMapping(value = "ds_distribution/insert_schema")
 	public ResponseEntity<Meta_Distribution> save(@RequestBody Meta_Distribution data) {
-		logger.info(data.toString());
 		distribution_Service.save(data);
 		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
 		layout.put("status", "200");
@@ -284,65 +286,57 @@ public class APIcontroller {
 		layout.put("message", "추가 완료");
 		return new ResponseEntity(layout, HttpStatus.OK);
 	}
-	
-//	//--------------------------------schema_info 
-//	//ds_distribution/select_all
-//		@GetMapping(value="ds_schema_info/select_all",produces = { MediaType.APPLICATION_JSON_VALUE })
-//		public ResponseEntity<List<Schema_Info>> getAllschemainfo() {
-//			List<Meta_Distribution> metadata = distribution_Service.getmeta_distributionList();
-//			HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
-//			layout.put("status", "200");
-//			layout.put("result", metadata);
-//			layout.put("message", "정상 호출");
-//
-//			return new ResponseEntity(layout, HttpStatus.OK);
-//		}
-//		
-//		
-//		//ds_distribution/select_identifier
-//		@GetMapping( value = "ds_distribution/select_identifier", produces = { MediaType.APPLICATION_JSON_VALUE })
-//		public ResponseEntity<Meta_Distribution> getdistribution(@RequestParam("identifier") String identifier) {
-//			Optional<Meta_Distribution> metadata = distribution_Service.findById(identifier);
-//			HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
-//			layout.put("status", "200");
-//			layout.put("result", metadata.get());
-//			layout.put("message", "정상 호출");
-//			return new ResponseEntity(layout, HttpStatus.OK);
-//		}
-//		
-//		
-//		//ds_distribution/delete_schema
-//		@DeleteMapping(value = "/ds_distribution/delete_schema", produces = { MediaType.APPLICATION_JSON_VALUE })
-//		public ResponseEntity<Meta_Distribution> deletedistribution(@RequestParam("identifier") String identifier) {
-//			distribution_Service.deleteById(identifier);
-//			HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
-//			layout.put("status", "200");
-//			layout.put("result", "DATASET_DOUZONE_4 삭제완료");
-//			layout.put("message", "삭제 완료");
-//			return new ResponseEntity(layout, HttpStatus.OK);
-//		}
-//		
-//		
-//		//ds_distribution/update_schema
-//		@PutMapping(value = "ds_distribution/update_schema", produces = { MediaType.APPLICATION_JSON_VALUE })
-//		public ResponseEntity<Meta_Basic> updatedistribution(@RequestParam("identifier") String identifier,
-//				@RequestBody Meta_Distribution member) {
-//			distribution_Service.updateById(identifier, member);
-//			HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
-//			layout.put("status", "200");
-//			layout.put("result", "DATASET 업데이트 완료");
-//			layout.put("message", "업데이트 완료");
-//			return new ResponseEntity(layout, HttpStatus.OK);
-//		}
-//		//ds_distribution/insert_schema
-//		@PostMapping(value = "ds_distribution/insert_schema")
-//		public ResponseEntity<Meta_Distribution> save(@RequestBody Meta_Distribution data) {
-//			logger.info(data.toString());
-//			distribution_Service.save(data);
-//			HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
-//			layout.put("status", "200");
-//			layout.put("result", "DATASET 추가");
-//			layout.put("message", "추가 완료");
-//			return new ResponseEntity(layout, HttpStatus.OK);
-//		}
+
+	// 여기서 부턴 schema_INFO crud api 명세서
+
+	// ds_schema_info/select_all
+	@GetMapping(value = "ds_schema_info/select_all", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<Schema_Info>> getAllschemainfo() {
+		List<Schema_Info> metadata = schemainfo_Service.getschema_List();
+		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
+		layout.put("status", "200");
+		layout.put("result", metadata);
+		layout.put("message", "정상 호출");
+
+		return new ResponseEntity(layout, HttpStatus.OK);
+	}
+
+	// ds_distribution/select_identifier
+	@GetMapping(value = "ds_schema_info/select_identifier", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Schema_Info> getschemainfo(@RequestParam("identifier") String identifier) {
+		Optional<Schema_Info> metadata = schemainfo_Service.findById(identifier);
+		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
+		layout.put("status", "200");
+		layout.put("result", metadata.get());
+		layout.put("message", "정상 호출");
+		return new ResponseEntity(layout, HttpStatus.OK);
+	}
+
+	// ds_distribution/delete_schema
+	@DeleteMapping(value = "/ds_schema_info/delete_schema", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Schema_Info> deleteschemainfo(@RequestParam("identifier") String identifier) {
+		schemainfo_Service.deleteById(identifier);
+		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
+		layout.put("status", "200");
+		layout.put("result", "DATASET_DOUZONE_4 삭제완료");
+		layout.put("message", "삭제 완료");
+		return new ResponseEntity(layout, HttpStatus.OK);
+	}
+
+	// ds_distribution/update_schema
+	@PutMapping(value = "ds_schema_info/update_schema", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Schema_Info> updateschemainfo(@RequestBody Schema_Info member) {
+		schemainfo_Service.updateById(member);
+		HashMap<String, Object> layout = new LinkedHashMap<String, Object>();
+		layout.put("status", "200");
+		layout.put("result", "DATASET 업데이트 완료");
+		layout.put("message", "업데이트 완료");
+		return new ResponseEntity(layout, HttpStatus.OK);
+	}
+	// ds_distribution/insert_schema
+	@PostMapping(value = "ds_schema_info/insert_schema")
+	public ResponseEntity<Schema_Info> save(@RequestBody Schema_Info data) {
+
+		return new ResponseEntity(schemainfo_Service.save(data), HttpStatus.OK);
+	}
 }

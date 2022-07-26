@@ -1,12 +1,15 @@
 package com.crud.service;
 
-import java.util.List; 
+import java.util.List;
 import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.crud.model.Meta_Basic;
+import com.crud.repository.MetaMapper;
 import com.crud.repository.MetaRepository;
 
 @Service
@@ -21,12 +24,18 @@ public class Meta_Service {
 
 	public List<Meta_Basic> getmeta_basicList() {
 		// TODO Auto-generated method stub
+		
 		List<Meta_Basic> result= metaRepository.findAll();
 	
 		return result;
 	}
 	public Optional<Meta_Basic> findById(String identifier){
 		Optional<Meta_Basic> result = metaRepository.findById(identifier);
+		return result;
+	}
+	
+	public List<Meta_Basic> findAll(){
+		List<Meta_Basic> result = metaRepository.findAll();
 		return result;
 	}
 //	public Optional<Meta_Basic> findById(String identifier) {
@@ -39,8 +48,8 @@ public class Meta_Service {
 //		return member;
 //	}
 	
-	public void updateById(String identifier, Meta_Basic member) {
-		Optional<Meta_Basic> e=  metaRepository.findById(identifier);
+	public void updateById(Meta_Basic member) {
+		Optional<Meta_Basic> e=  metaRepository.findById(member.getIdentifier());
 		
 		if(e.isPresent()) {
 			e.get().setIdentifier(member.getIdentifier()); 
@@ -60,6 +69,20 @@ public class Meta_Service {
 		return data;
 	}
 	
+	public List<Meta_Basic> filterlist_name(){
+		List<Meta_Basic> result = metaRepository.filterlist_name();
+		return result;
+	}
+	public List<Meta_Basic> filterlist_type(){
+		List<Meta_Basic> result = metaRepository.filterlist_name();
+		return result;
+	}
+	public List<Meta_Basic> filterlist_theme(){
+		List<Meta_Basic> result = metaRepository.filterlist_name();
+		return result;
+	}
+	
 
+	
 }
  

@@ -25,8 +25,8 @@ public class Distribution_Service {
 			return result;
 	}
 	
-	public void updateById(String identifier, Meta_Distribution member) {
-		Optional<Meta_Distribution> result = distributionRepository.findById(identifier);
+	public void updateById(Meta_Distribution member) {
+		Optional<Meta_Distribution> result = distributionRepository.findById(member.getIdentifier());
 		if(result.isPresent()) {
 			result.get().setIdentifier(member.getIdentifier()); 
 			distributionRepository.save(member);
